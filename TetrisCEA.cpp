@@ -41,7 +41,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
         }
 
         // test each case.
-        int step_limit = last_best_practice * 10 + 5000;
+        int step_limit = last_best_practice * 3 + 5000;
 
         typedef std::pair<int, TetrisResult> TestResultPair;
         vector<TestResultPair> test_results;    // vector of pairs of index and result.
@@ -58,7 +58,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
             }
             pair.second = sum / TEST_CNT_PER_CASE;
             test_results.push_back(pair);
-            std::cout << sum / TEST_CNT_PER_CASE << '\n';///
+            std::cout << i << "\t" << sum / TEST_CNT_PER_CASE << '\n';///
         }
 
         std::sort(test_results.begin(), test_results.end(),
@@ -75,7 +75,16 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
                 next_mu[i] += mu_test[index][i] / best_sample_cnt;
             }
         }
-        last_best_practice = test_results[best_sample_cnt - 1].second; // record the best practice.
+
+        // evaluate performance
+        int sum = 0;
+        tetrisEmulator.updateWight(next_mu);
+        for (int m = 0; m < TEST_CNT_AFTER_ITER; ++m)
+        {
+            sum += tetrisEmulator.next();
+        }
+        last_best_practice = sum / TEST_CNT_AFTER_ITER; // record the best practice.
+
         // $sigma: standard different of good cases.
         for (int k = 0; k < best_sample_cnt; ++k)
         {
@@ -100,7 +109,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
         save(iteration);
 
         // print information
-        std::cout << "best " << best_sample_cnt << ":\t" << last_best_practice << std::endl;
+        std::cout << "\nperformace:\t" << last_best_practice << "\n\n";
 
         iteration++;
     }
