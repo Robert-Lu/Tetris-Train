@@ -5,8 +5,8 @@
 #ifndef TETRIS_EMULATOR_TETRISCEA_H
 #define TETRIS_EMULATOR_TETRISCEA_H
 
-#define TEST_CNT_PER_CASE 2
-#define TEST_CNT_AFTER_ITER 5
+#define TEST_CNT_PER_CASE 1
+#define TEST_CNT_AFTER_ITER 3
 
 #include <fstream>
 #include "TetrisEmulator.h"

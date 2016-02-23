@@ -81,7 +81,9 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
         tetrisEmulator.updateWight(next_mu);
         for (int m = 0; m < TEST_CNT_AFTER_ITER; ++m)
         {
-            sum += tetrisEmulator.next();
+            int temp = tetrisEmulator.next();
+            sum += temp;
+            std::cout << "test case #" << m << ":\t" << temp << std::endl;
         }
         last_best_practice = sum / TEST_CNT_AFTER_ITER; // record the best practice.
 
@@ -117,7 +119,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
 
 void TetrisCEA::save(int iteration)
 {
-    ofstream fout(data_save_space + "\\" + std::to_string(iteration), ios_base::out);
+    ofstream fout(data_save_space + "/" + std::to_string(iteration), ios_base::out);
     for (int i = 0; i < FEATURE_COUNT; ++i)
     {
         fout << mu[i] << '\t';
@@ -128,7 +130,7 @@ void TetrisCEA::save(int iteration)
         fout << sigma[i] << '\t';
     }
     fout.close();
-    ofstream fout_best(data_save_space + "\\best", ios_base::out);
+    ofstream fout_best(data_save_space + "/best", ios_base::out);
     fout_best << iteration << '\t'
               << last_best_practice << '\n';
     for (int i = 0; i < FEATURE_COUNT; ++i)
@@ -145,7 +147,7 @@ void TetrisCEA::save(int iteration)
 
 int TetrisCEA::load()
 {
-    ifstream fin(data_save_space + "\\best", ios_base::in);
+    ifstream fin(data_save_space + "/best", ios_base::in);
     if (!fin)
     {
         return -1; // file not exist.
