@@ -8,9 +8,10 @@
 #define NEG_INF -9E99
 #define ASSERT(x, v, c) if((x)!=(v)) exit(c);
 
-TetrominoType randType()
+TetrominoType TetrisEmulator::randType()
 {
-    return (TetrominoType) (random() % TetrominoTypeCount);
+	std::uniform_int_distribution<int> distribution(0, 6);
+    return (TetrominoType) (distribution(generator));
 }
 
 void TetrisEmulator::init_board(TetrisBoard board)
@@ -88,22 +89,24 @@ TetrisResult TetrisEmulator::emulate(int step_limit)
         {
             break;
         }
+		//if (_DEBUG) // debug-time only.
+		//{
+		//	printBoard(board);
+		//	std::cout << getHoleDepth(board);
+		//}
         drop(board, type, bestRotation, bestX);
         getValue(board);
         step++;
+//		printBoard(board);
     }
     return step;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "OCUnusedGlobalDeclarationInspection"
 
 void TetrisEmulator::log()
 {
     return; // TODO
 }
-
-#pragma clang diagnostic pop
 
 bool TetrisEmulator::fail()
 {
@@ -155,7 +158,7 @@ int TetrisEmulator::drop(TetrisBoard b, TetrominoType type, int r, int x)
             }
         }
     }
-    lastLandingHeight = (T_HEIGHT - 1 - y) - TetrominoLowerBound[type][r]
+	lastLandingHeight = (T_HEIGHT - 1 - y) - TetrominoLowerBound[type][r]
                         + TetrominoHeight[type][r] * 1.0 / 2;
     for (int i = 0; i < 4; ++i)
     {
@@ -196,7 +199,7 @@ TetrisValue TetrisEmulator::getValue(TetrisBoard b)
                     (double)lastClearLines,
                     (double)getRowTransition(b),
                     (double)getColTransition(b),
-                    (double)getHolesCount(b),
+                    (double)getHoleDepth(b),
                     (double)getCumulativeWells(b),
             };
 
@@ -217,7 +220,8 @@ void TetrisEmulator::showFeatures(TetrisBoard b)
                     (double)lastClearLines,
                     (double)getRowTransition(b),
                     (double)getColTransition(b),
-                    (double)getHolesCount(b),
+                    (double)getHoleCount(b),
+                    (double)getHoleDepth(b),
                     (double)getCumulativeWells(b),
             };
     for (int i = 0; i < FEATURE_COUNT; ++i)
@@ -303,25 +307,53 @@ int TetrisEmulator::getColTransition(TetrisBoard b)
     return trans;
 }
 
-int TetrisEmulator::getHolesCount(TetrisBoard b)
+int TetrisEmulator::getHoleDepth(TetrisBoard b)
 {
-    int cnt = 0;
-    for (int x = 0; x < T_WIDTH; ++x)
-    {
-        bool covered = false;
-        for (int y = 0; y < T_HEIGHT; ++y)
-        {
-            if (!covered && b[x][y])
-            {
-                covered = true;
-            }
-            if (covered && !b[x][y])
-            {
-                cnt++;
-            }
-        }
-    }
-    return cnt;
+	int cnt = 0;
+	for (int x = 0; x < T_WIDTH; ++x)
+	{
+		bool covered = false;
+		int depth = 0;
+		for (int y = 0; y < T_HEIGHT; ++y)
+		{
+			if (!covered && b[x][y])
+			{
+				covered = true;
+			}
+			else if (covered)
+			{
+				depth++;
+				if (!b[x][y])
+				{
+					cnt += depth;
+				}
+			}
+		}
+	}
+	return cnt;
+}
+int TetrisEmulator::getHoleCount(TetrisBoard b)
+{
+	int cnt = 0;
+	for (int x = 0; x < T_WIDTH; ++x)
+	{
+		bool covered = false;
+		for (int y = 0; y < T_HEIGHT; ++y)
+		{
+			if (!covered && b[x][y])
+			{
+				covered = true;
+			}
+			else if (covered)
+			{
+				if (!b[x][y])
+				{
+					cnt += 1;
+				}
+			}
+		}
+	}
+	return cnt;
 }
 
 int TetrisEmulator::getCumulativeWells(TetrisBoard b)

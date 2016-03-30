@@ -3,7 +3,13 @@
 //
 
 #include <iostream>
+#include <cstdlib>
 #include "TetrisCEA.h"
+
+std::string to_s(int i)
+{
+	return std::to_string(i);
+}
 
 double TetrisCEA::normalDistribution(double mean, double stdd)
 {
@@ -25,6 +31,8 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
     {
         ++iteration;
     }
+
+	log("Train Start", INFO);
 
     while (iteration < iteration_limit)
     {
@@ -58,7 +66,8 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
             }
             pair.second = sum / TEST_CNT_PER_CASE;
             test_results.push_back(pair);
-            std::cout << i << "\t" << sum / TEST_CNT_PER_CASE << '\n';///
+			
+			log(to_s(i) + "\t" + to_s(sum / TEST_CNT_PER_CASE), INFO);
         }
 
         std::sort(test_results.begin(), test_results.end(),
@@ -66,6 +75,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
 
         // update $mu and $sigma
         WeightTestCase next_mu(FEATURE_COUNT, 0), next_sigma(FEATURE_COUNT, 0);
+
         // $mu: update with mean of all mu in good cases.
         for (int k = 0; k < best_sample_cnt; ++k)
         {
@@ -76,12 +86,17 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
             }
         }
 
+		// save $mu & $sigma
+		save(iteration);
+
         // evaluate performance
         int sum = 0;
         tetrisEmulator.updateWight(next_mu);
         for (int m = 0; m < TEST_CNT_AFTER_ITER; ++m)
         {
-            sum += tetrisEmulator.next();
+			int temp = tetrisEmulator.next();
+            sum += temp;
+			log("testcase#" + to_s(m) + "\t" + to_s(temp), INFO);
         }
         last_best_practice = sum / TEST_CNT_AFTER_ITER; // record the best practice.
 
@@ -97,27 +112,58 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
         double noise_rate = 0;
         if (noise != nullptr)
         {
-            noise_rate = noise(iteration);
+			// add noise if noise function exists.
+			try
+			{
+				noise_rate = noise(iteration);
+			}
+			catch (const std::exception& e)
+			{
+				log("noise() raised exception", ERROR);
+				noise_rate = 0;
+			}
         }
         for (int i = 0; i < FEATURE_COUNT; ++i)
         {
-            next_sigma[i] = sqrt(next_sigma[i]) + noise_rate * next_mu[i];
+            next_sigma[i] = sqrt(next_sigma[i]) + noise_rate * std::abs(next_mu[i]);
         }
         mu = next_mu;
         sigma = next_sigma;
 
-        save(iteration);
+        // save best information
+		save_best(iteration);
 
         // print information
-        std::cout << "\nperformace:\t" << last_best_practice << "\n\n";
+        log("performace:\t" + to_s(last_best_practice), RESULT);
 
         iteration++;
     }
+
+	log("Train End: Interarion Limit Reached", INFO);
+}
+
+void TetrisCEA::save_best(int iteration)
+{
+	ofstream fout_best(data_save_space + FILE_SEPERATOR + "best", ios_base::out);
+	fout_best << iteration << '\t'
+	          << last_best_practice << '\n';
+	fout_best << "MU:   \t";
+	for (int i = 0; i < FEATURE_COUNT; ++i)
+	{
+	    fout_best << mu[i] << '\t';
+	}
+	fout_best << '\n';
+	fout_best << "Sigma:\t";
+	for (int i = 0; i < FEATURE_COUNT; ++i)
+	{
+	    fout_best << sigma[i] << '\t';
+	}
+	fout_best.close();
 }
 
 void TetrisCEA::save(int iteration)
 {
-    ofstream fout(data_save_space + "\\" + std::to_string(iteration), ios_base::out);
+    ofstream fout(data_save_space + FILE_SEPERATOR + std::to_string(iteration), ios_base::out);
     for (int i = 0; i < FEATURE_COUNT; ++i)
     {
         fout << mu[i] << '\t';
@@ -128,24 +174,11 @@ void TetrisCEA::save(int iteration)
         fout << sigma[i] << '\t';
     }
     fout.close();
-    ofstream fout_best(data_save_space + "\\best", ios_base::out);
-    fout_best << iteration << '\t'
-              << last_best_practice << '\n';
-    for (int i = 0; i < FEATURE_COUNT; ++i)
-    {
-        fout_best << mu[i] << '\t';
-    }
-    fout_best << '\n';
-    for (int i = 0; i < FEATURE_COUNT; ++i)
-    {
-        fout_best << sigma[i] << '\t';
-    }
-    fout_best.close();
 }
 
 int TetrisCEA::load()
 {
-    ifstream fin(data_save_space + "\\best", ios_base::in);
+    ifstream fin(data_save_space + FILE_SEPERATOR + "best", ios_base::in);
     if (!fin)
     {
         return -1; // file not exist.
@@ -162,4 +195,30 @@ int TetrisCEA::load()
         fin >> sigma[i];
     }
     return iteration;
+}
+
+void TetrisCEA::log(std::string content, int rate)
+{
+	if (rate < LOG_RATE)
+	{
+		return;
+	}
+	switch (rate)
+	{
+	case DEBUG:
+		logout << "DEBUG \t" << content << std::endl;
+		break;
+	case INFO:
+		logout << "INFO  \t" << content << std::endl;
+		break;
+	case RESULT:
+		logout << "RESULT\t" << content << std::endl;
+		break;
+	case ERROR:
+		logout << "ERR   \t" << content << std::endl;
+		std::cerr << content << std::endl;
+	default:
+		break;
+	}
+	logout.flush();
 }

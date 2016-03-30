@@ -5,8 +5,16 @@
 #ifndef TETRIS_EMULATOR_TETRISCEA_H
 #define TETRIS_EMULATOR_TETRISCEA_H
 
-#define TEST_CNT_PER_CASE 2
-#define TEST_CNT_AFTER_ITER 5
+#define TEST_CNT_PER_CASE 1
+#define TEST_CNT_AFTER_ITER 3
+#define FILE_SEPERATOR "\\"
+
+#define DEBUG  0
+#define INFO   1
+#define RESULT 2
+#define ERROR  3
+
+#define LOG_RATE DEBUG
 
 #include <fstream>
 #include "TetrisEmulator.h"
@@ -24,7 +32,12 @@ class TetrisCEA
 {
 public:
     TetrisCEA(std::string dsp, TetrisEmulator te):
-            data_save_space(dsp), tetrisEmulator(te) {  }
+            data_save_space(dsp), tetrisEmulator(te), generator(time(NULL))
+	{
+		logout = ofstream(data_save_space + FILE_SEPERATOR + "log", std::ios_base::out);
+		logout << "LOG:\n";
+		logout.flush();
+	}
 
     typedef vector<double> WeightTestCase;
 
@@ -37,12 +50,15 @@ private:
     TetrisEmulator tetrisEmulator;
     std::default_random_engine generator;
     std::string data_save_space;
+	ofstream logout;
     WeightTestCase mu, sigma;
 
     double normalDistribution(double mean, double stdd);
 
     void save(int);
+	void save_best(int);
     int load();
+	void log(std::string content, int rate);
 };
 
 

@@ -6,13 +6,14 @@
 #define TETRIS_EMULATOR_TETRISEMULATOR_H
 
 #include "Tetromino.h"
+#include <string>
 #include <random>
 #include <vector>
 #include <ctime>
 
 #define T_HEIGHT 20
 #define T_WIDTH  10
-#define FEATURE_COUNT 6
+#define FEATURE_COUNT 7
 #define NO_LIMIT 2147483647
 
 typedef int TetrisResult;
@@ -25,7 +26,7 @@ class TetrisEmulator
 public:
     TetrisEmulator()
     {
-        srandom((unsigned)time(NULL));
+        //srandom((unsigned)time(NULL));
     }
 
     void updateWight(std::vector<double> w)
@@ -54,6 +55,7 @@ private:
     double lastLandingHeight;
     int step;
     int lastClearLines;
+	std::default_random_engine generator;
 
     void init_board(TetrisBoard board);
 
@@ -82,9 +84,13 @@ private:
 
     int getColTransition(TetrisBoard);
 
-    int getHolesCount(TetrisBoard);
+    int getHoleDepth(TetrisBoard);
+
+	int getHoleCount(TetrisBoard b);
 
     int getCumulativeWells(TetrisBoard);
+
+	TetrominoType randType();
 };
 
 
