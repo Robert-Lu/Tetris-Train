@@ -7,7 +7,7 @@
 
 #define TEST_CNT_PER_CASE 1
 #define TEST_CNT_AFTER_ITER 3
-#define FILE_SEPERATOR "\\"
+#define FILE_SEPERATOR "/"
 
 #define DEBUG  0
 #define INFO   1

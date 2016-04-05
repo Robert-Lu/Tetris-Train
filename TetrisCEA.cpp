@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include "TetrisCEA.h"
 
+#define INITIAL_SIGMA 5.0
+
 std::string to_s(int i)
 {
 	return std::to_string(i);
@@ -20,7 +22,7 @@ double TetrisCEA::normalDistribution(double mean, double stdd)
 void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sample_cnt, int best_sample_cnt)
 {
     mu = WeightTestCase(FEATURE_COUNT, 0.0);
-    sigma = WeightTestCase(FEATURE_COUNT, 5.0);
+    sigma = WeightTestCase(FEATURE_COUNT, INITIAL_SIGMA);
 
     int iteration;
     if ((iteration = load()) == -1)
@@ -125,7 +127,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
         }
         for (int i = 0; i < FEATURE_COUNT; ++i)
         {
-            next_sigma[i] = sqrt(next_sigma[i]) + noise_rate * std::abs(next_mu[i]);
+            next_sigma[i] = sqrt(next_sigma[i]) + noise_rate * INITIAL_SIGMA;
         }
         mu = next_mu;
         sigma = next_sigma;
@@ -147,16 +149,16 @@ void TetrisCEA::save_best(int iteration)
 	ofstream fout_best(data_save_space + FILE_SEPERATOR + "best", ios_base::out);
 	fout_best << iteration << '\t'
 	          << last_best_practice << '\n';
-	fout_best << "MU:   \t";
+//	fout_best << "MU:   \t";
 	for (int i = 0; i < FEATURE_COUNT; ++i)
 	{
-	    fout_best << mu[i] << '\t';
+	    fout_best << mu[i] << " \t";
 	}
 	fout_best << '\n';
-	fout_best << "Sigma:\t";
+//	fout_best << "Sigma:\t";
 	for (int i = 0; i < FEATURE_COUNT; ++i)
 	{
-	    fout_best << sigma[i] << '\t';
+	    fout_best << sigma[i] << " \t";
 	}
 	fout_best.close();
 }
