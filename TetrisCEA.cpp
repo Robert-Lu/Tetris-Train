@@ -51,7 +51,7 @@ void TetrisCEA::train(double (*noise)(int), int iteration_limit, int total_sampl
         }
 
         // test each case.
-        int step_limit = last_best_practice * 3 + 5000;
+        int step_limit = last_best_practice * 15 + 5000;
 
         typedef std::pair<int, TetrisResult> TestResultPair;
         vector<TestResultPair> test_results;    // vector of pairs of index and result.

@@ -199,6 +199,7 @@ TetrisValue TetrisEmulator::getValue(TetrisBoard b)
                     (double)lastClearLines,
                     (double)getRowTransition(b),
                     (double)getColTransition(b),
+		    (double)getHoleCount(b),
                     (double)getHoleDepth(b),
                     (double)getCumulativeWells(b),
             };
