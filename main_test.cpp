@@ -9,7 +9,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
     TetrisEmulator tetrisEmulator;
-    string dsv = "test_untitled";
+    string dsv = "test_unti tled";
     if (argc > 1)
     {
         dsv = argv[1];
@@ -17,9 +17,7 @@ int main(int argc, char **argv)
     TetrisCEA cea(dsv, tetrisEmulator);
 
 	cea.train([](int i) {
-		if (i > 30)
-			return 0.0;
-		return 0.33 * (30.0 - i) / 30.0; 
+		return 0.5;
 	});
 
     return 0;

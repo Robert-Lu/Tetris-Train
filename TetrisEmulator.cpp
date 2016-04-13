@@ -191,18 +191,44 @@ void TetrisEmulator::printBoard(TetrisBoard board)
     std::cout << "_____________________" << std::endl;
 }
 
+void TetrisEmulator::getFeature(double *f, TetrisBoard b)
+{
+//	printBoard(b);
+	int heights[10] = {};
+	int max = -1;
+	for (int x = 0; x < T_WIDTH; ++x)
+	{
+		for (int y = 0; y < T_HEIGHT; ++y)
+		{
+			if (b[x][y])
+			{
+				int h = T_HEIGHT - y;
+				if (h > max)
+					max = h;
+				heights[x] = h;
+				break;
+			}
+		}
+	}
+	f[0] = max;
+	f[1] = getHoleCount(b);
+	for (int i = 2; i < 12; i++)
+	{
+		f[i] = heights[i - 2];
+	}
+	for (int i = 12; i < 21; i++)
+	{
+		f[i] = heights[i - 11] - heights[i - 12];
+	}
+	int i;
+	i = 1;
+	return;
+}
+
 TetrisValue TetrisEmulator::getValue(TetrisBoard b)
 {
-    double feature[FEATURE_COUNT] =
-            {
-                    lastLandingHeight,
-                    (double)lastClearLines,
-                    (double)getRowTransition(b),
-                    (double)getColTransition(b),
-		    (double)getHoleCount(b),
-                    (double)getHoleDepth(b),
-                    (double)getCumulativeWells(b),
-            };
+	double feature[FEATURE_COUNT];
+	getFeature(feature, b);
 
     double v = 0;
     for (int i = 0; i < FEATURE_COUNT; ++i)

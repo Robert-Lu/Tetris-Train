@@ -6,7 +6,7 @@
 #define TETRIS_EMULATOR_TETRISCEA_H
 
 #define TEST_CNT_PER_CASE 1
-#define TEST_CNT_AFTER_ITER 3
+#define TEST_CNT_AFTER_ITER 15
 #define FILE_SEPERATOR "/"
 
 #define DEBUG  0
@@ -42,7 +42,7 @@ public:
     typedef vector<double> WeightTestCase;
 
     void train(double (*noise)(int) = nullptr, // noise return noise_rate, normally from 0.5 to 0;
-               int iteration_limit = 50, int total_sample_cnt = 100, int best_sample_cnt = 10
+               int iteration_limit = 50000000, int total_sample_cnt = 100, int best_sample_cnt = 10
                );
 
 private:

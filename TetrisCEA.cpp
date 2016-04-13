@@ -214,7 +214,7 @@ void TetrisCEA::log(std::string content, int rate)
 		logout << "INFO  \t" << content << std::endl;
 		break;
 	case RESULT:
-		logout << "RESULT\t" << content << std::endl;
+		std::cout << "RESULT\t" << content << std::endl;
 		break;
 	case ERROR:
 		logout << "ERR   \t" << content << std::endl;

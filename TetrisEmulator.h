@@ -13,7 +13,7 @@
 
 #define T_HEIGHT 20
 #define T_WIDTH  10
-#define FEATURE_COUNT 7
+#define FEATURE_COUNT 21
 #define NO_LIMIT 2147483647
 
 typedef int TetrisResult;
@@ -75,6 +75,8 @@ private:
     TetrisResult emulate(int step_limit);
 
     TetrisValue getValue(TetrisBoard b);
+
+	void getFeature(double *, TetrisBoard b);
 
     bool isFullLine(TetrisBoard b, int y);
 
